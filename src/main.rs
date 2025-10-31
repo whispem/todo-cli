@@ -239,95 +239,74 @@ enum Commands {
     Clear,
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let cli = Cli::parse();
+    
+let mut todo_list = TodoList::load().unwrap_or_else(|_| TodoList::new());
 
-    let mut todo_list = match TodoList::load() {
-        Ok(list) => list,
-        Err(e) => {
-            eprintln!("{} Failed to load tasks: {}", "Error:".red().bold(), e);
-            std::process::exit(1);
-        }
-    };
-
-    let result = match cli.command {
-        
-        Commands::Add { description } => {
-            let id = todo_list.add_task(description.clone());
-            todo_list.save()?;
-            println!("{} Task #{} added: {}", 
-                     "✓".green().bold(), 
-                     id.to_string().cyan().bold(),
-                     description.bright_white());
-            Ok(())
-        }
-
-        Commands::List { todo, done } => {
-            if todo {
-                todo_list.list_todo();
-            } else if done {
-                todo_list.list_done();
-            } else {
-                todo_list.list_all();
-            }
-            Ok(())
-        }
-
-        Commands::Done { id } => {
-            if todo_list.mark_done(id) {
-                todo_list.save()?;
-                println!("{} Task #{} marked as done!", 
-                         "✓".green().bold(), 
-                         id.to_string().cyan().bold());
-            } else {
-                eprintln!("{} Task #{} not found.", 
-                         "✗".red().bold(), 
-                         id.to_string().cyan());
-            }
-            Ok(())
-        }
-
-        Commands::Undone { id } => {
-            if todo_list.mark_todo(id) {
-                todo_list.save()?;
-                println!("{} Task #{} marked as todo.", 
-                         "✓".green().bold(), 
-                         id.to_string().cyan().bold());
-            } else {
-                eprintln!("{} Task #{} not found.", 
-                         "✗".red().bold(), 
-                         id.to_string().cyan());
-            }
-            Ok(())
-        }
-
-        Commands::Remove { id } => {
-            if todo_list.remove_task(id) {
-                todo_list.save()?;
-                println!("{} Task #{} removed.", 
-                         "✓".green().bold(), 
-                         id.to_string().cyan().bold());
-            } else {
-                eprintln!("{} Task #{} not found.", 
-                         "✗".red().bold(), 
-                         id.to_string().cyan());
-            }
-            Ok(())
-        }
-
-        Commands::Clear => {
-            let count = todo_list.clear_done();
-            todo_list.save()?;
-            println!("{} Cleared {} completed task(s).", 
-                     "✓".green().bold(), 
-                     count.to_string().cyan().bold());
-            Ok(())
-        }
-    };
-
-    if let Err(e) = result {
-        eprintln!("{} {}", "Error:".red().bold(), e);
-        std::process::exit(1);
+match cli.command {
+    Commands::Add { description } => {
+        let id = todo_list.add_task(description.clone());
+        todo_list.save()?;
+        println!("{} Task #{} added: {}", 
+                 "✓".green().bold(), 
+                 id.to_string().cyan().bold(),
+                 description.bright_white());
     }
+    Commands::List { todo, done } => {
+        if todo {
+            todo_list.list_todo();
+        } else if done {
+            todo_list.list_done();
+        } else {
+            todo_list.list_all();
+        }
+    }
+    Commands::Done { id } => {
+        if todo_list.mark_done(id) {
+            todo_list.save()?;
+            println!("{} Task #{} marked as done!", 
+                     "✓".green().bold(), 
+                     id.to_string().cyan().bold());
+        } else {
+            eprintln!("{} Task #{} not found.", 
+                     "✗".red().bold(), 
+                     id.to_string().cyan());
+        }
+    }
+    Commands::Undone { id } => {
+        if todo_list.mark_todo(id) {
+            todo_list.save()?;
+            println!("{} Task #{} marked as todo.", 
+                     "✓".green().bold(), 
+                     id.to_string().cyan().bold());
+        } else {
+            eprintln!("{} Task #{} not found.", 
+                     "✗".red().bold(), 
+                     id.to_string().cyan());
+        }
+    }
+    Commands::Remove { id } => {
+        if todo_list.remove_task(id) {
+            todo_list.save()?;
+            println!("{} Task #{} removed.", 
+                     "✓".green().bold(), 
+                     id.to_string().cyan().bold());
+        } else {
+            eprintln!("{} Task #{} not found.", 
+                     "✗".red().bold(), 
+                     id.to_string().cyan());
+        }
+    }
+    Commands::Clear => {
+        let count = todo_list.clear_done();
+        todo_list.save()?;
+        println!("{} Cleared {} completed task(s).", 
+                 "✓".green().bold(), 
+                 count.to_string().cyan().bold());
+    }
+}
+
+Ok(())
 }
