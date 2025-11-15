@@ -502,3 +502,7 @@ Want to learn more Rust?
 **Happy coding! 🚀**
 
 Built with ❤️ and 🦀 by [whispem](https://github.com/whispem)
+
+---
+
+If you spot anything that could be written in a more idiomatic or elegant Rust style, I’m always curious to understand why.
